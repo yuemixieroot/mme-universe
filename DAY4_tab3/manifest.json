@@ -1,0 +1,13 @@
+{
+  "name": "米me",
+  "short_name": "米me",
+  "description": "向宇宙下订单，让愿景自然显化",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#f0faf5",
+  "theme_color": "#a8d8c8",
+  "orientation": "any",
+  "icons": [
+    { "src": "米.png", "sizes": "any", "type": "image/png", "purpose": "any" }
+  ]
+}
