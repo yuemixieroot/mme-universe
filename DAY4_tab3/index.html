@@ -222,16 +222,21 @@ body{
   .task-panel{width:220px;}
 }
 @media(max-width:768px){
-  .app{padding:8px;gap:8px;}
-  .sidebar{width:52px;}
-  .sidebar .tab-btn{width:44px;height:44px;font-size:0.55rem;border-radius:12px;}
-  .sidebar .tab-btn .ico{font-size:1.1rem;}
-  .main-header h1{font-size:1.2rem;}
+  .app{padding:6px;gap:6px;}
+  .sidebar{width:48px;}
+  .sidebar .tab-btn{width:40px;height:40px;font-size:0.52rem;border-radius:10px;}
+  .sidebar .tab-btn .ico{font-size:1rem;}
+  .sidebar .io-btn{width:36px;height:36px;}
+  .sidebar .io-btn .ico{font-size:0.95rem;}
+  .main-header{padding:4px 0 2px;}
+  .main-header h1{font-size:1.1rem;}
+  .main-header p{font-size:0.7rem;}
   #tab1{flex-direction:column;}
-  .mm-wrap{min-height:280px;}
-  .task-panel{width:100%;max-height:200px;}
+  .mm-wrap{min-height:0;flex:1;}
+  .mm-bar{padding:5px 10px;}
+  .mm-bar .hint{display:none;}
+  .tab-panel{padding:8px;}
   .vision-grid{grid-template-columns:repeat(2,1fr);}
-  .tab-panel{padding:12px;}
 }
 
 /* ===== Tab3 — 宇宙拼图 + 专注印记 ===== */
@@ -250,6 +255,10 @@ body{
 .t3-task:hover{background:rgba(255,255,255,0.9);border-color:rgba(123,140,200,0.15);box-shadow:0 2px 8px rgba(123,140,200,0.06);}
 .t3-grip{cursor:grab;color:#c0c8d8;font-size:1rem;user-select:none;line-height:1;padding:0 2px;}
 .t3-grip:active{cursor:grabbing;}
+.t3-star{font-size:1.1rem;cursor:pointer;user-select:none;transition:all 0.2s;color:#ddd;line-height:1;padding:0 2px;}
+.t3-star:hover{color:#f0c040;transform:scale(1.2);}
+.t3-star.active{color:#f0c040;}
+.t3-task.important{background:rgba(240,192,64,0.06);border-left:3px solid rgba(240,192,64,0.4);}
 .t3-task input[type="checkbox"]{width:16px;height:16px;accent-color:#7b8cc8;cursor:pointer;flex-shrink:0;}
 .t3-task-text{flex:1;font-size:0.88rem;font-weight:600;color:#555;transition:all 0.2s;}
 .t3-task-text.done{text-decoration:line-through;color:#bbb;}
@@ -834,15 +843,20 @@ function initMindMap() {
       '请确认 lib/simpleMindMap.umd.min.js 文件存在</span>';
     return;
   }
+  // 检查容器尺寸，为 0 说明布局未完成，延迟重试
+  const canvas = document.getElementById('mmCanvas');
+  if (!canvas || canvas.offsetWidth === 0 || canvas.offsetHeight === 0) {
+    setTimeout(initMindMap, 200);
+    return;
+  }
   MindMapClass = raw.__esModule ? raw.default : (raw.default || raw);
   const saved = load('mindmap');
-  // Handle both formats: v4 full data {root, layout, theme, view} or plain root node
   let data = saved || cloneSample();
   if (data && data.root) data = data.root;
 
   try {
     mm = new MindMapClass({
-      el: document.getElementById('mmCanvas'),
+      el: canvas,
       data: data,
       enableFreeDrag: true, enableNodeDrag: true,
       nodeTextEdit: true, nodeTextEditZIndex: 1000,
@@ -855,7 +869,11 @@ function initMindMap() {
     });
     window._mm = mm;
   } catch(e) {
-    document.getElementById('mmLoading').innerHTML = '<span style="color:#e88">️ 订单库初始化失败</span><span style="font-size:0.78rem;color:#bbb;max-width:360px;text-align:center;line-height:1.6;">' + e.message + '</span>';
+    if (e.message && e.message.includes('宽高不能为0')) {
+      setTimeout(initMindMap, 500);
+      return;
+    }
+    document.getElementById('mmLoading').innerHTML = '<span style="color:#e88">️ 订单库初始化失败</span><span style="font-size:0.78rem;color:#bbb;max-width:360px;text-align:center;line-height:1.6;">' + e.message + '<br><br><button onclick="location.reload()" style="padding:8px 20px;background:#a8d8c8;border:none;border-radius:8px;color:#fff;font-weight:700;cursor:pointer;font-size:0.85rem;">刷新重试</button></span>';
     return;
   }
   document.getElementById('mmLoading').style.display = 'none';
@@ -1130,17 +1148,23 @@ function importData(file) {
       if (data.mindmap) {
         save('mindmap', data.mindmap);
         if (mm) {
-          if (data.mindmap.root) {
-            mm.setFullData(data.mindmap);
-          } else {
-            mm.setFullData({ root: data.mindmap });
-          }
-          // 等待渲染完成后再同步
-          setTimeout(() => {
+          try {
+            if (data.mindmap.root) {
+              mm.setFullData(data.mindmap);
+            } else {
+              mm.setFullData({ root: data.mindmap });
+            }
             syncTasks();
-            if (typeof t3Render === 'function') t3Render();
+          } catch(err) {
+            console.error('导图恢复出错:', err);
+            toast('⚠️ 导图数据恢复异常，请重试');
+          }
+          setTimeout(() => {
             try { mm.resize(); mm.view.fit(); } catch {}
-          }, 500);
+            if (typeof t3Render === 'function') t3Render();
+          }, 600);
+        } else {
+          toast('⚠️ 导图引擎未加载，已保存数据，刷新后可用');
         }
       }
 
@@ -1184,8 +1208,8 @@ function t3Load() {
   }
   if (d.items) {
     // 确保所有任务自动归类为每日任务
-    d.items.forEach(it => {
-      if (it.type === 'task' && !it.taskType) it.taskType = 'daily';
+    d.items.forEach((it, i) => {
+      if (it.type === 'task') { if (!it.taskType) it.taskType = 'daily'; if (it.important === undefined) it.important = false; if (it._origIdx === undefined) it._origIdx = i; }
     });
     t3Data = d;
   }
@@ -1209,6 +1233,11 @@ function t3Render() {
   const list = document.createElement('div');
   list.className = 't3-task-list';
   list.dataset.list = 'main';
+  // 重要任务排前面，非重要任务按原始位置排序
+  const important = t3Data.items.filter(i => i.type === 'task' && i.important);
+  const rest = t3Data.items.filter(i => !(i.type === 'task' && i.important));
+  rest.sort((a, b) => (a._origIdx || 0) - (b._origIdx || 0));
+  t3Data.items = [...important, ...rest];
   t3Data.items.forEach((item, idx) => {
     if (item.type === 'divider') list.appendChild(t3CreateDividerEl(item, idx));
     else list.appendChild(t3CreateTaskEl(item, idx));
@@ -1221,7 +1250,7 @@ function t3Render() {
 
 function t3CreateTaskEl(item, idx) {
   const el = document.createElement('div');
-  el.className = 't3-task';
+  el.className = 't3-task' + (item.important ? ' important' : '');
   el.dataset.idx = idx;
   const grip = document.createElement('span');
   grip.className = 't3-grip'; grip.innerHTML = '⠿';
@@ -1233,6 +1262,15 @@ function t3CreateTaskEl(item, idx) {
       const newEl = document.querySelector('.t3-task[data-idx="' + idx + '"]');
       if (newEl) { newEl.classList.add('twinkle'); setTimeout(() => newEl.classList.remove('twinkle'), 600); }
     }
+  });
+  // 星标按钮
+  const starBtn = document.createElement('span');
+  starBtn.className = 't3-star';
+  starBtn.textContent = item.important ? '★' : '☆'; starBtn.className = 't3-star' + (item.important ? ' active' : '');
+  starBtn.title = item.important ? '取消重要' : '标记重要';
+  starBtn.addEventListener('click', () => {
+    t3Data.items[idx].important = !t3Data.items[idx].important;
+    t3Save(); t3Render();
   });
   const txt = document.createElement('span');
   txt.className = 't3-task-text' + (item.done ? ' done' : '');
@@ -1252,7 +1290,7 @@ function t3CreateTaskEl(item, idx) {
   const delBtn = document.createElement('button');
   delBtn.className = 't3-del'; delBtn.textContent = '✕';
   delBtn.addEventListener('click', () => { t3Data.items.splice(idx, 1); t3Save(); t3Render(); });
-  el.appendChild(grip); el.appendChild(cb); el.appendChild(txt);
+  el.appendChild(grip); el.appendChild(cb); el.appendChild(starBtn); el.appendChild(txt);
   el.appendChild(typeBtn); el.appendChild(focusBtn); el.appendChild(delBtn);
   return el;
 }
@@ -1307,7 +1345,7 @@ function t3SyncFromMindmap() {
       existing.fromMM = true;
     } else {
       // 导图新增的叶子 → 加入 Tab3
-      t3Data.items.push({ id: t3Uid(), type: 'task', text, done: false, taskType: 'daily', fromMM: true });
+      t3Data.items.push({ id: t3Uid(), type: 'task', text, done: false, taskType: 'daily', fromMM: true, _origIdx: t3Data.items.length, important: false });
       changed = true;
     }
   });
@@ -1482,7 +1520,7 @@ function initTab3() {
   });
   document.getElementById('t3AddTask').addEventListener('click', () => {
     t3ShowAddModal('🧩 添加拼图块', '输入拼图块内容', text => {
-      t3Data.items.push({ id: t3Uid(), type: 'task', text: text, done: false, taskType: 'daily' });
+      t3Data.items.push({ id: t3Uid(), type: 'task', text: text, done: false, taskType: 'daily', _origIdx: t3Data.items.length, important: false });
       t3Save(); t3Render();
     });
   });
