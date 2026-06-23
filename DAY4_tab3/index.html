@@ -79,12 +79,12 @@ body{
 .tab-panel.active{display:flex;}
 
 /* ===== Tab1 ===== */
-#tab1{flex-direction:row;gap:14px;}
+#tab1{flex-direction:column;}
 .mm-wrap{
-  flex:1;display:flex;flex-direction:column;
+  flex:1;display:flex;flex-direction:column;min-height:400px;
   background:rgba(255,255,255,0.85);border-radius:16px;
   border:1px solid rgba(168,216,200,0.15);
-  overflow:hidden;min-height:0;position:relative;
+  overflow:hidden;position:relative;
 }
 .mm-bar{
   display:flex;align-items:center;justify-content:space-between;
@@ -107,7 +107,7 @@ body{
 
 /* ===== Task Panel ===== */
 .task-panel{
-  width:260px;flex-shrink:0;display:flex;flex-direction:column;
+  display:none!important;
   background:rgba(255,255,255,0.85);border-radius:16px;
   border:1px solid rgba(168,216,200,0.15);overflow:hidden;
 }
@@ -315,9 +315,11 @@ body{
 }
 @media(max-width:768px){
   #tab3{flex-direction:column;}
-  .t3-right{width:100%;padding:16px;}
-  .t3-ring-wrap{width:150px;height:150px;}
-  .t3-time{font-size:1.8rem;}
+  .t3-left{min-height:60vh;}
+  .t3-right{width:100%;padding:16px;max-height:40vh;}
+  .t3-ring-wrap{width:120px;height:120px;}
+  .t3-time{font-size:1.5rem;}
+  .t3-durations{flex-wrap:wrap;}
 }
 
 /* ===== 新增：宇宙系列视觉增补 ===== */
@@ -367,6 +369,8 @@ body::after{
     <button class="tab-btn" data-tab="tab2"><span class="ico">🏆</span>成就系统</button>
     <button class="tab-btn" data-tab="tab3"><span class="ico">🧩</span>宇宙拼图</button>
     <div class="spacer"></div>
+    <button class="io-btn" id="btnCloudBackup" title="备份到云端"><span class="ico">☁️</span>云备份</button>
+    <button class="io-btn" id="btnCloudRestore" title="从云端恢复"><span class="ico">🌐</span>云恢复</button>
     <button class="io-btn" id="btnExport" title="导出备份"><span class="ico">💾</span>备份</button>
     <button class="io-btn" id="btnImport" title="恢复备份"><span class="ico">📂</span>恢复</button>
   </div>
@@ -531,6 +535,71 @@ body::after{
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- Firebase — 云端恢复（拆分存储，每类数据独立文档） -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+const _fc = { apiKey:"AIzaSyBNtY_F4cE7wuzBZlB-O15sJBdX_xUbGzQ", authDomain:"mme-universe.firebaseapp.com", projectId:"mme-universe", storageBucket:"mme-universe.firebasestorage.app", messagingSenderId:"95028715387", appId:"1:95028715387:web:1708336613311e9380e7de" };
+const _fapp = initializeApp(_fc);
+const _fDB = getFirestore(_fapp);
+const _fDocs = { mindmap: doc(_fDB, "mme", "mindmap"), imgs: doc(_fDB, "mme", "imgs"), tab3: doc(_fDB, "mme", "tab3"), tab: doc(_fDB, "mme", "tab") };
+function _size(v) { return JSON.stringify(v).length; }
+function _toastSize(name, kb) { if (kb > 900) { toast('⚠️ ' + name + '过大（' + kb + 'KB），接近云端限制'); return false; } return true; }
+
+// 云端恢复：从 Firestore 读取并应用数据（拆分读取）
+window.cloudRestore = async function() {
+  toast('🌐 正在从云端读取...');
+  try {
+    let count = 0;
+    const mSnap = await getDoc(_fDocs.mindmap);
+    if (mSnap.exists()) { const d = mSnap.data(); save('mindmap', d.v); if (mm) { if (d.v && d.v.root) mm.setFullData(d.v); else mm.setFullData({root:d.v}); syncTasks(); } count++; }
+    const iSnap = await getDoc(_fDocs.imgs);
+    if (iSnap.exists()) { save('imgs', iSnap.data().v); imgs = iSnap.data().v; renderBoard(); count++; }
+    const tSnap = await getDoc(_fDocs.tab3);
+    if (tSnap.exists()) { save('tab3', tSnap.data().v); t3Data = tSnap.data().v; t3Load(); t3Render(); t3RenderRecords(); count++; }
+    const tabSnap = await getDoc(_fDocs.tab);
+    if (tabSnap.exists()) { const tab = tabSnap.data().v; save('tab', tab); const btn = document.querySelector('.tab-btn[data-tab="'+tab+'"]'); if (btn && !btn.classList.contains('active')) btn.click(); }
+    toast(count ? '☁️ 已恢复 ' + count + ' 项数据' : '☁️ 云端还没有数据');
+  } catch(e) { toast('⚠️ 云端恢复失败'); console.error('云端恢复错误:', e.code, e.message); }
+};
+
+// 备份到云端：拆分保存，每类独立文档
+window.cloudBackup = async function() {
+  toast('☁️ 正在备份到云端...');
+  try {
+    let totalKB = 0;
+    // 保存 mindmap
+    const mmData = mm ? mm.getData(true) : null;
+    const mmKB = _size(mmData) / 1024 | 0;
+    if (mmKB > 900) { toast('⚠️ 导图数据过大（' + mmKB + 'KB）'); return; }
+    await setDoc(_fDocs.mindmap, { v: mmData }); totalKB += mmKB;
+    // 保存 imgs
+    const imgsKB = _size(imgs) / 1024 | 0;
+    if (imgsKB > 900) { toast('⚠️ 成就图片过大（' + imgsKB + 'KB），建议减少图片数量或压缩'); return; }
+    await setDoc(_fDocs.imgs, { v: imgs }); totalKB += imgsKB;
+    // 保存 tab3
+    const t3KB = _size(t3Data) / 1024 | 0;
+    if (t3KB > 900) { toast('⚠️ 拼图数据过大（' + t3KB + 'KB）'); return; }
+    await setDoc(_fDocs.tab3, { v: t3Data }); totalKB += t3KB;
+    // 保存 tab
+    const tab = document.querySelector('.tab-btn.active')?.dataset.tab || 'tab1';
+    await setDoc(_fDocs.tab, { v: tab });
+    toast('☁️ 已备份 ' + totalKB + 'KB 到云端');
+  } catch(e) { toast('⚠️ 云端备份失败'); console.error('云端备份错误:', e.code, e.message); }
+};
+// 启动时测试 Firestore 连接
+(async () => {
+  try {
+    await getDoc(_fDocs.tab);
+    console.log('✅ Firestore 连接正常');
+  } catch(e) {
+    console.error('❌ Firestore 连接失败:', e.code, e.message);
+    if (e.code === 'permission-denied') {
+      console.error('请检查 Firestore 规则是否允许读写：https://console.firebase.google.com/project/mme-universe/firestore/rules');
+    }
+  }
+})();
+</script>
 <!-- SimpleMindMap — LOCAL lib, zero network dependency -->
 <script src="lib/simpleMindMap.umd.min.js"></script>
 <!-- Sortable.js for task drag-to-reorder (Tab3) -->
@@ -692,7 +761,7 @@ function leaves(root) {
 }
 function silentUpdate(data) {
   updating = true;
-  mm.updateData(data);
+  mm.setData(JSON.parse(JSON.stringify(data)));
   setTimeout(() => { updating = false; }, 100);
 }
 
@@ -771,21 +840,28 @@ function initMindMap() {
   let data = saved || cloneSample();
   if (data && data.root) data = data.root;
 
-  mm = new MindMapClass({
-    el: document.getElementById('mmCanvas'),
-    data: data,
-    enableFreeDrag: true, enableNodeDrag: true,
-    nodeTextEdit: true, nodeTextEditZIndex: 1000,
-    enableShortcutOnlyWhenMouseInSvg: false,
-    mousewheelAction: 'zoom',
-    theme: 'freshGreen', layout: 'logicalStructure',
-    paddingX: 40, paddingY: 40, isShowScrollbar: true,
-  });
-  window._mm = mm;
+  try {
+    mm = new MindMapClass({
+      el: document.getElementById('mmCanvas'),
+      data: data,
+      enableFreeDrag: true, enableNodeDrag: true,
+      nodeTextEdit: true, nodeTextEditZIndex: 1000,
+      enableShortcutOnlyWhenMouseInSvg: false,
+      mousewheelAction: 'zoom',
+      enableTouchZoom: true, enableTouchDrag: true, enableTouchSelection: true,
+      enablePinchZoom: true,
+      theme: 'freshGreen', layout: 'logicalStructure',
+      paddingX: 40, paddingY: 40, isShowScrollbar: true,
+    });
+    window._mm = mm;
+  } catch(e) {
+    document.getElementById('mmLoading').innerHTML = '<span style="color:#e88">️ 订单库初始化失败</span><span style="font-size:0.78rem;color:#bbb;max-width:360px;text-align:center;line-height:1.6;">' + e.message + '</span>';
+    return;
+  }
   document.getElementById('mmLoading').style.display = 'none';
 
   mm.on('data_change', onDataChangeDebounced);
-  mm.on('node_tree_render_end', () => { if (!updating) persist(); });
+  mm.on('node_tree_render_end', () => { if (!updating) { persist(); t3SyncFromMindmap(); } });
   try { mm.on('node_text_change', onDataChangeDebounced); } catch {}
   syncTasks();
   setTimeout(() => { try { mm.resize(); mm.view.fit(); } catch(e) {} }, 200);
@@ -859,7 +935,7 @@ let imgs = [];
 let dragIdx = null;
 
 function compress(file, maxKB) {
-  maxKB = maxKB || 200;
+  maxKB = maxKB || 150;
   return new Promise((res, rej) => {
     const r = new FileReader();
     r.onload = e => {
@@ -990,8 +1066,15 @@ async function init() {
   let tries = 0;
   (function wait() {
     if (typeof window.simpleMindMap !== 'undefined') initMindMap();
-    else if (++tries < 80) setTimeout(wait, 100);
-    else initMindMap();
+    else if (++tries < 200) {
+      if (tries === 50) {
+        const el = document.getElementById('mmLoading');
+        if (el && el.querySelector('span')) el.querySelector('span').textContent = '文件较大，请稍候...';
+      }
+      setTimeout(wait, 100);
+    } else {
+      document.getElementById('mmLoading').innerHTML = '<span style="color:#e88">⚠️ 订单库加载超时</span><span style="font-size:0.78rem;color:#bbb;max-width:360px;text-align:center;line-height:1.6;">请刷新页面重试，或检查 lib/simpleMindMap.umd.min.js 是否存在</span>';
+    }
   })();
   document.getElementById('btnAll').addEventListener('click', () => { if (mm) completeAll(); });
   // Tab3
@@ -1047,14 +1130,17 @@ function importData(file) {
       if (data.mindmap) {
         save('mindmap', data.mindmap);
         if (mm) {
-          // v4 format: {root, layout, theme, view} → setFullData
-          // v3 format: plain root node → wrap it
           if (data.mindmap.root) {
             mm.setFullData(data.mindmap);
           } else {
             mm.setFullData({ root: data.mindmap });
           }
-          syncTasks();
+          // 等待渲染完成后再同步
+          setTimeout(() => {
+            syncTasks();
+            if (typeof t3Render === 'function') t3Render();
+            try { mm.resize(); mm.view.fit(); } catch {}
+          }, 500);
         }
       }
 
@@ -1143,8 +1229,6 @@ function t3CreateTaskEl(item, idx) {
   cb.type = 'checkbox'; cb.checked = item.done;
   cb.addEventListener('change', () => {
     t3Data.items[idx].done = cb.checked; t3Save(); t3Render();
-    t3SyncToMindmap(item.text, cb.checked);
-    // 新增：星光闪烁效果
     if (cb.checked) {
       const newEl = document.querySelector('.t3-task[data-idx="' + idx + '"]');
       if (newEl) { newEl.classList.add('twinkle'); setTimeout(() => newEl.classList.remove('twinkle'), 600); }
@@ -1167,7 +1251,7 @@ function t3CreateTaskEl(item, idx) {
   focusBtn.addEventListener('click', () => { t3CurrentIntent = item.text; t3OpenModal(); });
   const delBtn = document.createElement('button');
   delBtn.className = 't3-del'; delBtn.textContent = '✕';
-  delBtn.addEventListener('click', () => { t3RemoveFromMindmap(item.text); t3Data.items.splice(idx, 1); t3Save(); t3Render(); });
+  delBtn.addEventListener('click', () => { t3Data.items.splice(idx, 1); t3Save(); t3Render(); });
   el.appendChild(grip); el.appendChild(cb); el.appendChild(txt);
   el.appendChild(typeBtn); el.appendChild(focusBtn); el.appendChild(delBtn);
   return el;
@@ -1198,7 +1282,7 @@ function t3CreateDividerEl(item, idx) {
   return el;
 }
 
-function t3InitFromMindmap() {
+function t3SyncFromMindmap() {
   if (!mm) return;
   const root = mm.getData();
   if (!root) return;
@@ -1208,17 +1292,32 @@ function t3InitFromMindmap() {
     if (!n.children || !n.children.length) lf.push(n);
     else (n.children || []).forEach(walk);
   })(root);
-  const existing = new Set(t3Data.items.filter(i => i.type === 'task').map(i => i.text));
-  let added = false;
+  const mmTexts = new Set();
+  let changed = false;
   lf.forEach(leaf => {
     const text = stripHtml(leaf.data.text);
-    if (text && !existing.has(text)) {
-      t3Data.items.push({ id: t3Uid(), type: 'task', text, done: hasCheck(leaf.data.text), taskType: 'daily' });
-      existing.add(text);
-      added = true;
+    if (!text) return;
+    mmTexts.add(text);
+    // 找已存在的导图任务（按文字匹配）
+    const existing = t3Data.items.find(i => i.type === 'task' && stripHtml(i.text) === text);
+    if (existing) {
+      // 文字变了就更新（Tab3 改文字不影响导图，但导图改文字会同步过来）
+      const newText = text;
+      if (existing.text !== newText) { existing.text = newText; changed = true; }
+      existing.fromMM = true;
+    } else {
+      // 导图新增的叶子 → 加入 Tab3
+      t3Data.items.push({ id: t3Uid(), type: 'task', text, done: false, taskType: 'daily', fromMM: true });
+      changed = true;
     }
   });
-  if (added) t3Save();
+  // 导图里已删除的叶子 → 从 Tab3 移除（只移除标记为 fromMM 的）
+  t3Data.items = t3Data.items.filter(i => {
+    if (i.type !== 'task') return true;
+    if (i.fromMM && !mmTexts.has(stripHtml(i.text))) { changed = true; return false; }
+    return true;
+  });
+  if (changed) t3Save();
 }
 
 function t3SyncToMindmap(text, checked) {
@@ -1366,7 +1465,7 @@ function t3OpenModal() {
 function t3CloseModal() { document.getElementById('t3Modal').classList.remove('show'); }
 
 function initTab3() {
-  t3Load(); t3InitFromMindmap(); t3DailyReset(); t3Render(); t3RenderRecords();
+  t3Load(); t3SyncFromMindmap(); t3DailyReset(); t3Render(); t3RenderRecords();
   document.querySelectorAll('#t3Durations .t3-dur').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#t3Durations .t3-dur').forEach(b => b.classList.remove('active'));
@@ -1442,6 +1541,8 @@ function initTab3() {
 }
 
 init();
+document.getElementById('btnCloudBackup').addEventListener('click', () => { if (window.cloudBackup) window.cloudBackup(); else toast('⚠️ 云端未就绪'); });
+document.getElementById('btnCloudRestore').addEventListener('click', () => { if (window.cloudRestore) window.cloudRestore(); else toast('⚠️ 云端未就绪'); });
 document.getElementById('btnExport').addEventListener('click', exportData);
 document.getElementById('btnImport').addEventListener('click', () => document.getElementById('importIn').click());
 document.getElementById('importIn').addEventListener('change', function (e) {
