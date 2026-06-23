@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+
+
+  <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -14,6 +16,7 @@
 <link rel="apple-touch-icon" href="米.png">
 <!-- SimpleMindMap — local lib, no CDN needed -->
 <link rel="stylesheet" href="lib/simpleMindMap.esm.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;}
@@ -368,6 +371,57 @@ body::after{
 .logo-img{width:55px;height:55px;object-fit:contain;border-radius:12px;}
 .h1-img{height:2.2rem;vertical-align:middle;object-fit:contain;margin-right:8px;}
 .h1-sub{font-size:0.85rem;font-weight:600;color:#b0b8c8;letter-spacing:1px;-webkit-text-fill-color:#b0b8c8;vertical-align:middle;}
+/* ===== Tab4 - 一念即达（重新设计） ===== */
+#tab4{flex-direction:column;overflow-y:auto;padding:20px 16px 40px;}
+.t4-container{max-width:560px;width:100%;margin:0 auto;}
+.t4-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
+.t4-title{font-size:1.6rem;font-weight:600;letter-spacing:0.5px;color:#1a1a1a;font-family:'Quicksand',-apple-system,sans-serif;}
+.t4-badge{font-size:0.8rem;background:#e8e3de;padding:4px 12px;border-radius:30px;color:#4a4a4a;font-weight:600;}
+.t4-card{background:#fff;border-radius:24px;padding:24px 20px;box-shadow:0 4px 16px rgba(0,0,0,0.04);margin-bottom:20px;border:1px solid #efebe8;}
+.t4-card-label{font-size:0.88rem;font-weight:500;color:#7a7a7a;margin-bottom:12px;letter-spacing:0.3px;}
+.t4-input-wrap{display:flex;gap:10px;align-items:center;}
+.t4-input-wrap input{flex:1;padding:14px 16px;border:1.5px solid #e0d8d2;border-radius:16px;font-size:1rem;background:#fcfbf9;transition:border 0.2s;outline:none;font-family:'Quicksand',-apple-system,sans-serif;color:#1e1e1e;}
+.t4-input-wrap input:focus{border-color:#b8a9a0;}
+.t4-input-wrap input::placeholder{color:#c0b8b0;}
+.t4-btn-set{background:#1e1e1e;color:#fff;border:none;padding:14px 20px;border-radius:16px;font-size:0.95rem;font-weight:500;cursor:pointer;transition:background 0.2s;white-space:nowrap;font-family:'Quicksand',-apple-system,sans-serif;}
+.t4-btn-set:active{background:#3a3a3a;}
+.t4-target-list{margin-top:16px;}
+.t4-target-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f0ebe7;}
+.t4-target-item:last-child{border-bottom:none;}
+.t4-target-text{font-size:1rem;font-weight:450;color:#1e1e1e;}
+.t4-target-remove{background:none;border:none;color:#c5b8b0;font-size:1.1rem;cursor:pointer;padding:0 4px;transition:color 0.2s;}
+.t4-target-remove:active{color:#a09088;}
+.t4-empty-hint{color:#b8aba2;font-size:0.95rem;padding:8px 0 4px;}
+.t4-release-trigger-wrap{text-align:right;margin:6px 0 10px;}
+.t4-release-trigger{background:none;border:none;color:#c5b8b0;font-size:0.88rem;cursor:pointer;padding:6px 8px;border-radius:30px;transition:background 0.2s;font-family:'Quicksand',-apple-system,sans-serif;}
+.t4-release-trigger:active{background:#f0ebe7;}
+.t4-release-layer{display:none;margin-top:8px;}
+.t4-release-layer.open{display:block;}
+.t4-release-question{font-size:1.12rem;font-weight:500;margin-bottom:8px;line-height:1.5;color:#1e1e1e;font-family:'Quicksand',-apple-system,sans-serif;}
+.t4-release-hint{font-size:0.88rem;color:#8a7a72;margin-bottom:14px;line-height:1.5;}
+.t4-release-input{width:100%;padding:12px 16px;border:1.5px solid #e0d8d2;border-radius:14px;font-size:0.95rem;background:#fcfbf9;outline:none;margin-bottom:14px;font-family:'Quicksand',-apple-system,sans-serif;resize:vertical;color:#1e1e1e;}
+.t4-release-input:focus{border-color:#b8a9a0;}
+.t4-release-input::placeholder{color:#c0b8b0;}
+.t4-btn-step{background:#f0ebe7;color:#1e1e1e;border:none;padding:12px 24px;border-radius:40px;font-size:0.95rem;font-weight:500;cursor:pointer;transition:background 0.2s;margin-right:10px;margin-bottom:8px;font-family:'Quicksand',-apple-system,sans-serif;}
+.t4-btn-step:active{background:#e0d8d2;}
+.t4-btn-reset{background:transparent;border:1.5px solid #e0d8d2;color:#5a4a42;padding:12px 24px;border-radius:40px;font-size:0.95rem;font-weight:450;cursor:pointer;transition:background 0.2s;margin-bottom:8px;font-family:'Quicksand',-apple-system,sans-serif;}
+.t4-btn-reset:active{background:#f5f0ec;}
+.t4-release-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.t4-log-area{margin-top:20px;padding-top:16px;border-top:1px solid #efebe8;}
+.t4-log-title{font-size:0.82rem;color:#b8aba2;margin-bottom:8px;font-weight:450;}
+.t4-log-item{font-size:0.88rem;color:#4a4a4a;padding:6px 0;border-bottom:1px dashed #f0ebe7;line-height:1.5;}
+.t4-log-item:last-child{border-bottom:none;}
+.t4-log-empty{color:#c5b8b0;font-size:0.88rem;}
+.t4-log-time{font-size:0.75rem;color:#bbb0a8;margin-right:6px;}
+.t4-footer-note{text-align:center;font-size:0.82rem;color:#ccc5c0;margin-top:20px;letter-spacing:0.3px;}
+@media(max-width:480px){
+  .t4-title{font-size:1.35rem;}
+  .t4-card{padding:20px 16px;}
+  .t4-input-wrap{flex-wrap:wrap;}
+  .t4-input-wrap input{width:100%;}
+  .t4-btn-set{width:100%;text-align:center;}
+  .t4-release-question{font-size:1.05rem;}
+}
 </style>
 </head>
 <body>
@@ -377,6 +431,7 @@ body::after{
     <button class="tab-btn active" data-tab="tab1"><span class="ico">🌌</span>宇宙订单</button>
     <button class="tab-btn" data-tab="tab2"><span class="ico">🏆</span>成就系统</button>
     <button class="tab-btn" data-tab="tab3"><span class="ico">🧩</span>宇宙拼图</button>
+    <button class="tab-btn" data-tab="tab4"><span class="ico">🔮</span>一念即达</button>
     <div class="spacer"></div>
     <button class="io-btn" id="btnCloudBackup" title="备份到云端"><span class="ico">☁️</span>云备份</button>
     <button class="io-btn" id="btnCloudRestore" title="从云端恢复"><span class="ico">🌐</span>云恢复</button>
@@ -492,6 +547,44 @@ body::after{
         </div>
       </div>
     </div>
+        <div id="tab4" class="tab-panel">
+      <div class="t4-container">
+        <div class="t4-header">
+          <span class="t4-title">✨ 一念即达</span>
+          <span class="t4-badge">显化工作台</span>
+        </div>
+        <div class="t4-card">
+          <div class="t4-card-label">🎯 此刻我想显化</div>
+          <div class="t4-input-wrap">
+            <input type="text" id="t4TargetInput" placeholder="例如：我拥有健康有力量的身材" />
+            <button class="t4-btn-set" id="t4TargetAdd">设定</button>
+          </div>
+          <div class="t4-target-list" id="t4TargetList">
+            <div class="t4-empty-hint">还没有目标，写一个你想要的吧</div>
+          </div>
+        </div>
+        <div class="t4-release-trigger-wrap">
+          <button class="t4-release-trigger" id="t4ReleaseTrigger"> 感觉卡住了？点这里释放</button>
+        </div>
+        <div class="t4-card t4-release-layer" id="t4ReleaseLayer">
+          <div class="t4-release-question" id="t4ReleaseQuestion">先感受一下，卡住的是什么？</div>
+          <div class="t4-release-hint" id="t4ReleaseHint">把你此刻的念头、情绪、身体感受写下来</div>
+          <textarea class="t4-release-input" id="t4ReleaseInput" rows="2" placeholder="例如：我觉得我不配拥有这么多钱，胸口有点堵"></textarea>
+          <div class="t4-release-actions">
+            <button class="t4-btn-step" id="t4ReleaseStepBtn">👉 我能允许它存在吗？</button>
+            <button class="t4-btn-reset" id="t4ReleaseResetBtn"> 重新开始</button>
+          </div>
+          <div class="t4-log-area" id="t4LogArea">
+            <div class="t4-log-title">📋 释放记录</div>
+            <div id="t4LogList">
+              <div class="t4-log-empty">还没有释放记录</div>
+            </div>
+          </div>
+        </div>
+        <div class="t4-footer-note">你设定的，已在路上。</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -529,7 +622,9 @@ body::after{
     <div class="t3-modal-actions">
       <button class="t3-btn t3-btn-secondary" id="t3ModalCancel">稍后 🌙</button>
       <button class="t3-btn t3-btn-primary" id="t3ModalStart">开始拼图 🧩</button>
-    </div>
+    
+    
+</div>
   </div>
 </div>
 
@@ -1105,6 +1200,7 @@ async function init() {
       else { console.warn('Sortable.js not loaded — Tab3 drag disabled'); initTab3(); }
     })();
   }
+  initTab4();
   document.getElementById('t3ResetBtn').addEventListener('click', () => {
     if (!confirm('确定要重置所有拼图块吗？ 🌙')) return;
     t3Data.items.forEach(it => { if (it.type === 'task' && it.taskType === 'daily') it.done = false; });
@@ -1577,6 +1673,122 @@ function initTab3() {
   fg.style.strokeDasharray = RING_CIRCUM;
   t3UpdateRing(); t3UpdateTimeDisplay();
 }
+
+// =============================================================
+//  Tab4 - 一念即达（重设计版）
+// =============================================================
+(function() {
+  var TARGETS_KEY = 'manifest_targets';
+  var LOGS_KEY = 'manifest_logs';
+  var currentStep = 0;
+  var currentFeeling = '';
+
+  function getTargets() { try { return JSON.parse(localStorage.getItem(TARGETS_KEY)) || []; } catch { return []; } }
+  function setTargets(arr) { localStorage.setItem(TARGETS_KEY, JSON.stringify(arr)); }
+  function getLogs() { try { return JSON.parse(localStorage.getItem(LOGS_KEY)) || []; } catch { return []; } }
+  function setLogs(arr) { localStorage.setItem(LOGS_KEY, JSON.stringify(arr)); }
+  function nowStr() { return new Date().toLocaleString('zh-CN', { hour12: false, month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); }
+  function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  function renderTargets() {
+    var list = document.getElementById('t4TargetList');
+    var targets = getTargets();
+    list.innerHTML = '';
+    if (!targets.length) { list.innerHTML = '<div class="t4-empty-hint">还没有目标，写一个你想要的吧</div>'; return; }
+    targets.forEach(function(text, i) {
+      var div = document.createElement('div');
+      div.className = 't4-target-item';
+      div.innerHTML = '<span class="t4-target-text">' + esc(text) + '</span><button class="t4-target-remove" data-i="' + i + '">✕</button>';
+      list.appendChild(div);
+    });
+    list.querySelectorAll('.t4-target-remove').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var t = getTargets(); t.splice(+this.dataset.i, 1); setTargets(t); renderTargets();
+      });
+    });
+  }
+
+  function renderLogs() {
+    var list = document.getElementById('t4LogList');
+    var logs = getLogs();
+    list.innerHTML = '';
+    if (!logs.length) { list.innerHTML = '<div class="t4-log-empty">还没有释放记录</div>'; return; }
+    logs.slice().reverse().forEach(function(item) {
+      var div = document.createElement('div');
+      div.className = 't4-log-item';
+      div.innerHTML = '<span class="t4-log-time">' + esc(item.time) + '</span>' + esc(item.text);
+      list.appendChild(div);
+    });
+  }
+
+  function addLog(text) { var logs = getLogs(); logs.push({ time: nowStr(), text: text }); setLogs(logs); renderLogs(); }
+
+  function addTarget() {
+    var v = document.getElementById('t4TargetInput').value.trim();
+    if (!v) return;
+    var t = getTargets(); t.push(v); setTargets(t); renderTargets();
+    document.getElementById('t4TargetInput').value = '';
+  }
+
+  function resetRelease() {
+    currentStep = 0; currentFeeling = '';
+    document.getElementById('t4ReleaseQuestion').textContent = '先感受一下，卡住的是什么？';
+    document.getElementById('t4ReleaseHint').textContent = '把你此刻的念头、情绪、身体感受写下来';
+    document.getElementById('t4ReleaseInput').value = '';
+    document.getElementById('t4ReleaseStepBtn').textContent = ' 我能允许它存在吗？';
+    document.getElementById('t4ReleaseLayer').classList.remove('open');
+  }
+
+  function stepRelease() {
+    var input = document.getElementById('t4ReleaseInput').value.trim();
+    if (currentStep === 0) {
+      if (!input) { document.getElementById('t4ReleaseHint').textContent = ' 先写点什么，再继续吧'; return; }
+      currentFeeling = input; currentStep = 1;
+      document.getElementById('t4ReleaseQuestion').textContent = '关于「' + currentFeeling + '」——';
+      document.getElementById('t4ReleaseHint').textContent = '第一步：我能允许它存在吗？（允许它就在这里，不赶走它）';
+      document.getElementById('t4ReleaseStepBtn').textContent = ' 我能允许它存在';
+      return;
+    }
+    if (currentStep === 1) {
+      currentStep = 2;
+      document.getElementById('t4ReleaseHint').textContent = '第二步：我能放下它吗？（哪怕只是放下一分钟）';
+      document.getElementById('t4ReleaseStepBtn').textContent = ' 我能放下它';
+      return;
+    }
+    if (currentStep === 2) {
+      currentStep = 3;
+      document.getElementById('t4ReleaseHint').textContent = '第三步：我什么时候放下？（回答「现在」即可）';
+      document.getElementById('t4ReleaseStepBtn').textContent = ' 现在';
+      return;
+    }
+    if (currentStep === 3) {
+      addLog('释放：「' + currentFeeling + '」 现在');
+      currentStep = 0; currentFeeling = '';
+      document.getElementById('t4ReleaseQuestion').textContent = '✨ 释放完成。感觉怎么样？可以继续记录新的感受。';
+      document.getElementById('t4ReleaseHint').textContent = '如果还有卡住的感觉，重新写下来继续释放。';
+      document.getElementById('t4ReleaseInput').value = '';
+      document.getElementById('t4ReleaseStepBtn').textContent = ' 我再感受一下';
+    }
+  }
+
+  window.initTab4 = function() {
+    renderTargets();
+    renderLogs();
+    document.getElementById('t4TargetAdd').addEventListener('click', addTarget);
+    document.getElementById('t4TargetInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') addTarget(); });
+    document.getElementById('t4ReleaseTrigger').addEventListener('click', function() {
+      var layer = document.getElementById('t4ReleaseLayer');
+      if (layer.classList.contains('open')) { layer.classList.remove('open'); }
+      else { layer.classList.add('open'); setTimeout(function() { layer.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100); }
+    });
+    document.getElementById('t4ReleaseStepBtn').addEventListener('click', stepRelease);
+    document.getElementById('t4ReleaseResetBtn').addEventListener('click', function() { resetRelease(); });
+    document.getElementById('t4ReleaseInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && document.getElementById('t4ReleaseLayer').classList.contains('open')) { e.preventDefault(); stepRelease(); }
+    });
+    if (!getTargets().length) setTimeout(function() { document.getElementById('t4TargetInput').focus(); }, 300);
+  };
+})();
 
 init();
 document.getElementById('btnCloudBackup').addEventListener('click', () => { if (window.cloudBackup) window.cloudBackup(); else toast('⚠️ 云端未就绪'); });
