@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 我的省钱累积器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "PingFang SC", sans-serif;
+            background: #f7f3ee;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 40px;
+            padding: 48px 40px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.06);
+            text-align: center;
+        }
+        .emoji-big { font-size: 48px; margin-bottom: 8px; }
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #3d2c1e;
+            letter-spacing: 1px;
+        }
+        .sub {
+            color: #a28d7a;
+            font-size: 14px;
+            margin-top: 4px;
+            margin-bottom: 32px;
+        }
+        .total-box {
+            background: #faf8f6;
+            border-radius: 28px;
+            padding: 32px 20px 28px;
+            margin-bottom: 32px;
+            border: 1px solid #ede8e2;
+        }
+        .total-label {
+            font-size: 13px;
+            color: #b5a392;
+            letter-spacing: 2px;
+        }
+        .total-number {
+            font-size: 64px;
+            font-weight: 700;
+            color: #2b5e3b;
+            line-height: 1.2;
+            margin-top: 4px;
+            font-variant-numeric: tabular-nums;
+            transition: all 0.15s ease;
+        }
+        .total-number.pop {
+            transform: scale(1.04);
+            color: #1f7a3a;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .input-group input {
+            flex: 1;
+            padding: 16px 18px;
+            border: 1px solid #e2d8d0;
+            border-radius: 18px;
+            font-size: 18px;
+            font-weight: 500;
+            outline: none;
+            background: #fcfaf8;
+            transition: 0.2s;
+            color: #3d2c1e;
+        }
+        .input-group input:focus {
+            border-color: #8fb89b;
+            background: white;
+        }
+        .input-group input::placeholder {
+            color: #ccc2b8;
+            font-weight: 400;
+            font-size: 15px;
+        }
+        .btn-add {
+            padding: 16px 28px;
+            background: #2b5e3b;
+            color: white;
+            border: none;
+            border-radius: 18px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            white-space: nowrap;
+        }
+        .btn-add:hover { background: #1f4a2e; transform: scale(0.97); }
+        .btn-add:active { transform: scale(0.94); }
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .quick-btn {
+            padding: 8px 18px;
+            background: #f0ebe6;
+            border: none;
+            border-radius: 30px;
+            font-size: 14px;
+            color: #5a4a3a;
+            cursor: pointer;
+            transition: 0.1s;
+            font-weight: 500;
+        }
+        .quick-btn:hover { background: #e3dad2; }
+        .reset-area {
+            margin-top: 28px;
+            border-top: 1px solid #eee8e2;
+            padding-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+        .reset-btn {
+            background: none;
+            border: none;
+            color: #bfb0a2;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: underline dotted;
+            padding: 4px 8px;
+        }
+        .reset-btn:hover { color: #a08472; }
+        .history {
+            margin-top: 24px;
+            text-align: left;
+            border-top: 1px solid #f0eae4;
+            padding-top: 18px;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #7a6a5a;
+            padding: 4px 0;
+            border-bottom: 1px dashed #f3ede8;
+        }
+        .history-item .h-val { font-weight: 600; color: #2b5e3b; }
+        .history-empty { color: #ccc2b8; font-size: 13px; text-align: center; padding: 8px 0; }
+        .footer-note {
+            margin-top: 16px;
+            font-size: 12px;
+            color: #ccc2b8;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="emoji-big">🌱</div>
+    <h1>我的省钱累积器</h1>
+    <div class="sub">每省一笔，离自由更近一步</div>
+
+    <div class="total-box">
+        <div class="total-label">已累计节省</div>
+        <div class="total-number" id="totalDisplay">0.00</div>
+    </div>
+
+    <div class="input-group">
+        <input type="number" id="amountInput" step="0.01" min="0.01" placeholder="输入金额" autofocus>
+        <button class="btn-add" id="addBtn">+ 添加</button>
+    </div>
+
+    <div class="quick-actions">
+        <button class="quick-btn" data-amount="5">+5</button>
+        <button class="quick-btn" data-amount="10">+10</button>
+        <button class="quick-btn" data-amount="20">+20</button>
+        <button class="quick-btn" data-amount="50">+50</button>
+    </div>
+
+    <div class="history" id="historyList">
+        <div class="history-empty">还没有记录，添加第一笔吧 ✨</div>
+    </div>
+
+    <div class="reset-area">
+        <button class="reset-btn" id="resetConfirmBtn">重置所有记录</button>
+    </div>
+    <div class="footer-note">数据只保存在你的浏览器中</div>
+</div>
+
+<script>
+    // ---------- 核心逻辑 ----------
+    const STORAGE_KEY = 'saving_tracker_data';
+
+    // 数据结构：{ total: 0, records: [5, 10, 3.5, ...] }
+    function loadData() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const data = JSON.parse(raw);
+                if (typeof data.total === 'number' && Array.isArray(data.records)) {
+                    return data;
+                }
+            }
+        } catch (e) {}
+        return { total: 0, records: [] };
+    }
+
+    function saveData(data) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    let data = loadData();
+
+    // DOM 元素
+    const totalDisplay = document.getElementById('totalDisplay');
+    const amountInput = document.getElementById('amountInput');
+    const addBtn = document.getElementById('addBtn');
+    const historyList = document.getElementById('historyList');
+
+    // 渲染总金额
+    function renderTotal(animate = false) {
+        totalDisplay.textContent = data.total.toFixed(2);
+        if (animate) {
+            totalDisplay.classList.add('pop');
+            setTimeout(() => totalDisplay.classList.remove('pop'), 200);
+        }
+    }
+
+    // 渲染历史记录（只显示最近10条）
+    function renderHistory() {
+        if (data.records.length === 0) {
+            historyList.innerHTML = '<div class="history-empty">还没有记录，添加第一笔吧 ✨</div>';
+            return;
+        }
+        // 显示最近10条（倒序，最新的在上面）
+        const recent = data.records.slice(-10).reverse();
+        let html = '';
+        recent.forEach((val, index) => {
+            // 如果是第一条显示 "刚刚" 的标记（可选）
+            const prefix = index === 0 ? '🟢 ' : '';
+            html += `<div class="history-item">
+                <span>${prefix}${index === 0 ? '刚刚 · ' : ''}+${Number(val).toFixed(2)}</span>
+                <span class="h-val">¥${Number(val).toFixed(2)}</span>
+            </div>`;
+        });
+        if (data.records.length > 10) {
+            html += `<div style="text-align:center;color:#ccc2b8;font-size:12px;padding-top:6px;">…… 共 ${data.records.length} 笔</div>`;
+        }
+        historyList.innerHTML = html;
+    }
+
+    // 添加一笔
+    function addAmount(val) {
+        const num = parseFloat(val);
+        if (isNaN(num) || num <= 0) {
+            // 简单提示
+            amountInput.style.borderColor = '#d95b5b';
+            setTimeout(() => amountInput.style.borderColor = '#e2d8d0', 600);
+            return false;
+        }
+        data.total += num;
+        data.records.push(num);
+        saveData(data);
+        renderTotal(true);
+        renderHistory();
+        amountInput.value = '';
+        amountInput.focus();
+        return true;
+    }
+
+    // 重置（二次确认）
+    function resetData() {
+        if (data.records.length === 0) return;
+        if (confirm('确定要清除所有记录吗？此操作不可撤销。')) {
+            data = { total: 0, records: [] };
+            saveData(data);
+            renderTotal(false);
+            renderHistory();
+            amountInput.focus();
+        }
+    }
+
+    // ---------- 绑定事件 ----------
+    addBtn.addEventListener('click', () => {
+        const val = amountInput.value.trim();
+        if (val === '') return;
+        addAmount(val);
+    });
+
+    amountInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addBtn.click();
+        }
+    });
+
+    // 快捷按钮
+    document.querySelectorAll('.quick-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const amt = parseFloat(btn.dataset.amount);
+            addAmount(amt);
+        });
+    });
+
+    // 重置
+    document.getElementById('resetConfirmBtn').addEventListener('click', resetData);
+
+    // ---------- 启动 ----------
+    renderTotal(false);
+    renderHistory();
+    // 自动聚焦
+    amountInput.focus();
+
+    // 如果用户点击页面空白，也聚焦输入框
+    document.querySelector('.card').addEventListener('click', (e) => {
+        if (e.target.closest('button') || e.target.closest('input')) return;
+        amountInput.focus();
+    });
+</script>
+</body>
+</html>

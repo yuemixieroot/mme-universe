@@ -138,51 +138,70 @@ body{
 }
 .btn-complete:hover{opacity:0.88;transform:translateY(-1px);}
 
-/* ===== Tab2 ===== */
+/* ===== Tab2 — 愿景板（无缝方块拼贴）===== */
 #tab2{flex-direction:column;}
-.vb-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-shrink:0;}
+.vb-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-shrink:0;}
 .vb-head h2{font-size:1.05rem;color:#5aa88c;font-weight:800;}
 .vb-head .cnt{font-size:0.8rem;color:#a0b8a8;font-weight:600;margin-left:6px;}
-.btn-upload{
-  padding:8px 20px;
-  background:linear-gradient(135deg,#a8d8c8,#88c8a8);
-  border:none;border-radius:12px;color:#fff;font-weight:700;
-  cursor:pointer;font-size:0.88rem;transition:all 0.25s;font-family:inherit;
+.vb-btns{display:flex;gap:8px;}
+.btn-upload,.btn-textcard{
+  padding:7px 16px;border:none;border-radius:10px;color:#fff;font-weight:700;
+  cursor:pointer;font-size:0.82rem;transition:all 0.25s;font-family:inherit;
 }
+.btn-upload{background:linear-gradient(135deg,#a8d8c8,#88c8a8);}
 .btn-upload:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(168,216,200,0.35);}
+.btn-textcard{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:#c0d0e0;}
+.btn-textcard:hover{background:rgba(255,255,255,0.14);}
+/* 无缝方格网格 */
 .vision-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
-  flex:1;overflow-y:auto;align-content:start;min-height:200px;padding:2px;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:0;flex:1;overflow-y:auto;align-content:start;min-height:200px;
 }
-.vision-grid.drop-over{
-  background:rgba(168,216,200,0.06);
-  outline:2px dashed rgba(168,216,200,0.35);outline-offset:-6px;border-radius:12px;
+/* 方块卡片 */
+.tile{
+  position:relative;overflow:hidden;
+  cursor:pointer;background:#0d1117;
+  transition:box-shadow 0.25s;
 }
-.img-card{
-  position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;
-  cursor:grab;border:2px solid rgba(255,255,255,0.6);
-  transition:transform 0.25s,box-shadow 0.25s;background:#fff;
+.tile:hover{box-shadow:inset 0 0 0 2px rgba(168,216,200,0.3);z-index:2;}
+.tile img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
+/* 文字卡（纯色方块） */
+.tile.text-card{display:flex;align-items:center;justify-content:center;padding:16px;text-align:center;}
+.tile.text-card .t-text{font-weight:800;line-height:1.4;text-shadow:0 1px 4px rgba(0,0,0,0.3);}
+/* 添加卡 */
+.tile.add-tile{
+  background:rgba(168,216,200,0.04);border:2px dashed rgba(168,216,200,0.15);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;
+  cursor:pointer;transition:all 0.25s;
 }
-.img-card:hover{transform:scale(1.03);box-shadow:0 6px 24px rgba(0,0,0,0.08);border-color:rgba(168,216,200,0.4);}
-.img-card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
-.img-card .del{
-  position:absolute;top:6px;right:6px;width:26px;height:26px;
-  background:rgba(0,0,0,0.35);backdrop-filter:blur(4px);border:none;
-  border-radius:50%;color:#fff;font-size:13px;cursor:pointer;
+.tile.add-tile:hover{background:rgba(168,216,200,0.08);border-color:rgba(168,216,200,0.3);}
+.tile.add-tile .plus{font-size:1.8rem;font-weight:300;color:#5aa88c;}
+.tile.add-tile .hint{font-size:0.65rem;color:#607080;}
+/* 显化光晕（7天以上） */
+.tile.manifested{
+  border-color:rgba(240,194,127,0.4);
+  box-shadow:0 0 14px rgba(240,194,127,0.15);
+}
+.tile.manifested:hover{box-shadow:0 0 20px rgba(240,194,127,0.25);}
+/* 删除按钮 */
+.tile .del{
+  position:absolute;top:5px;right:5px;width:24px;height:24px;
+  background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);border:none;
+  border-radius:50%;color:#fff;font-size:12px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  opacity:0;transition:opacity 0.2s;line-height:1;
+  opacity:0;transition:opacity 0.2s;z-index:5;
 }
-.img-card:hover .del{opacity:1;}
-.img-card .del:hover{background:rgba(239,68,68,0.75);}
-.img-card.dragging{opacity:0.3;transform:scale(0.95);}
-.img-card.over{border-color:#a8d8c8;border-style:dashed;}
-.img-card.golden{
-  border-color:rgba(240,194,127,0.5);
-  box-shadow:0 0 18px rgba(240,194,127,0.3),0 0 36px rgba(240,194,127,0.12);
-}
-.img-card.golden:hover{box-shadow:0 0 24px rgba(240,194,127,0.45),0 0 48px rgba(240,194,127,0.18);}
+.tile:hover .del{opacity:1;}
+.tile .del:hover{background:rgba(239,68,68,0.75);}
+/* 拖拽 */
+.tile.dragging{opacity:0.3;}
+.tile.over{border-color:#a8d8c8;border-style:dashed;}
+/* 空状态 */
 .vb-empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:#ccc;font-weight:600;}
 .vb-empty .icon{font-size:2.5rem;margin-bottom:10px;}
+/* 文字卡选择器 */
+.tc-color{transition:border-color 0.15s;}.tc-color:hover,.tc-color.selected{border-color:#fff !important;}
+.tc-size{transition:all 0.15s;}.tc-size:hover,.tc-size.selected{background:rgba(168,216,200,0.15) !important;color:#a8d8c8 !important;border-color:rgba(168,216,200,0.3) !important;}
 
 /* ===== Context Menu ===== */
 .ctx-menu{
@@ -366,7 +385,7 @@ body::after{
 }
 .t3-task.twinkle{animation:twinkle 0.6s ease-out;}
 /* 卡片弹性缓出 */
-.img-card{transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.25s cubic-bezier(0.34,1.56,0.64,1);}
+.tile{transition:opacity 0.25s cubic-bezier(0.34,1.56,0.64,1);}
 /* 新增：品牌图片样式 */
 .logo-img{width:55px;height:55px;object-fit:contain;border-radius:12px;}
 .h1-img{height:2.2rem;vertical-align:middle;object-fit:contain;margin-right:8px;}
@@ -475,10 +494,13 @@ body::after{
     </div>
 
     <div id="tab2" class="tab-panel">
-      <div class="tab-subtitle">已显化的成果展，你的成就展柜</div>
+      <div class="tab-subtitle">用照片和文字拼出你的愿景，让梦想可视化 🌌</div>
       <div class="vb-head">
-        <h2>🏆 成就系统 <span class="cnt" id="imgCnt"></span></h2>
-        <button class="btn-upload" id="btnUpload">🏆 上传成就</button>
+        <h2>🏆 我的愿景板 <span class="cnt" id="imgCnt"></span></h2>
+        <div class="vb-btns">
+          <button class="btn-textcard" id="btnTextCard">✎ 添加文字</button>
+          <button class="btn-upload" id="btnUpload">📷 上传照片</button>
+        </div>
       </div>
       <div class="vision-grid" id="vGrid"></div>
     </div>
@@ -585,6 +607,31 @@ body::after{
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- 文字卡 Modal -->
+<div class="t3-modal-overlay" id="textCardModal">
+  <div class="t3-modal" style="max-width:420px;">
+    <h3>✎ 添加文字卡</h3>
+    <textarea id="tcText" placeholder="输入你的愿景金句…" rows="3" style="width:100%;padding:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#e0e8f0;font-size:0.9rem;resize:vertical;font-family:inherit;margin-top:10px;box-sizing:border-box;"></textarea>
+    <div style="margin-top:12px;">
+      <div style="font-size:0.72rem;color:#8898a8;font-weight:600;margin-bottom:6px;">背景色</div>
+      <div id="tcColors" style="display:flex;gap:6px;flex-wrap:wrap;">
+        <div class="tc-color selected" data-bg="#c8a8d8" style="width:28px;height:28px;border-radius:50%;background:#c8a8d8;cursor:pointer;border:2px solid #fff;"></div>
+        <div class="tc-color" data-bg="#a8d8c8" style="width:28px;height:28px;border-radius:50%;background:#a8d8c8;cursor:pointer;border:2px solid transparent;"></div>
+        <div class="tc-color" data-bg="#d8a8a8" style="width:28px;height:28px;border-radius:50%;background:#d8a8a8;cursor:pointer;border:2px solid transparent;"></div>
+        <div class="tc-color" data-bg="#a8b8d8" style="width:28px;height:28px;border-radius:50%;background:#a8b8d8;cursor:pointer;border:2px solid transparent;"></div>
+        <div class="tc-color" data-bg="#d8c8a8" style="width:28px;height:28px;border-radius:50%;background:#d8c8a8;cursor:pointer;border:2px solid transparent;"></div>
+        <div class="tc-color" data-bg="#2a1a2a" style="width:28px;height:28px;border-radius:50%;background:#2a1a2a;cursor:pointer;border:2px solid transparent;"></div>
+        <div class="tc-color" data-bg="#1a2a3a" style="width:28px;height:28px;border-radius:50%;background:#1a2a3a;cursor:pointer;border:2px solid transparent;"></div>
+        <div class="tc-color" data-bg="#2a1a1a" style="width:28px;height:28px;border-radius:50%;background:#2a1a1a;cursor:pointer;border:2px solid transparent;"></div>
+      </div>
+    </div>
+    <div class="t3-modal-actions" style="margin-top:16px;">
+      <button class="t3-btn t3-btn-secondary" id="tcCancel">取消</button>
+      <button class="t3-btn t3-btn-primary" id="tcConfirm">添加 ✨</button>
+    </div>
   </div>
 </div>
 
@@ -793,6 +840,7 @@ function stripHtml(s) {
   d.innerHTML = s || '';
   return (d.textContent || d.innerText || '').replace(/✅/g, '').trim();
 }
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 function hasCheck(s) { return /✅/.test(s || ''); }
 function addCheck(s) { return s + ' ✅'; }
 
@@ -1042,7 +1090,7 @@ function setupContextMenu() {
 }
 
 // =============================================================
-//  Vision Board
+//  Vision Board — 拼贴愿景板
 // =============================================================
 let imgs = [];
 let dragIdx = null;
@@ -1085,54 +1133,74 @@ function placeholder(bg, emoji, label) {
   );
 }
 const DEFAULTS = [
-  { url: placeholder('#c8e8d8', '🌌', '第一笔订单'), ts: Date.now() - 2 * 86400000 },
-  { url: placeholder('#c8d8e8', '⭐', '闪耀成就'), ts: Date.now() - 10 * 86400000 },
+  { type: 'photo', url: placeholder('#c8e8d8', '🌌', '第一笔订单'), ts: Date.now() - 2 * 86400000 },
+  { type: 'photo', url: placeholder('#c8d8e8', '⭐', '闪耀成就'), ts: Date.now() - 10 * 86400000 },
 ];
 function saveImgs() { save('imgs', imgs); }
-
 function renderBoard() {
   const g = document.getElementById('vGrid');
   const cnt = document.getElementById('imgCnt');
   g.innerHTML = '';
   if (!imgs.length) {
-    g.innerHTML = '<div class="vb-empty"><div class="icon">🏆</div><div>你的成就展柜还空着，上传第一个成就吧</div></div>';
+    g.innerHTML = '<div class="vb-empty"><div class="icon"></div><div>你的愿景板还空着，上传照片或添加文字卡吧</div></div>';
     cnt.textContent = ''; return;
   }
   cnt.textContent = '(' + imgs.length + ')';
   const now = Date.now();
   imgs.forEach((im, i) => {
-    const card = document.createElement('div');
-    card.className = 'img-card'; card.draggable = true; card.dataset.idx = i;
-    if (im.ts && (now - im.ts) > 7 * 86400000) card.classList.add('golden');
-    const img = document.createElement('img'); img.src = im.url;
-    const del = document.createElement('button');
-    del.className = 'del'; del.textContent = '✕'; del.title = '移除';
-    del.addEventListener('click', ev => {
+    const tile = document.createElement('div');
+    const isText = im.type === 'text';
+
+    if (isText) {
+      tile.className = 'tile text-card';
+      tile.style.background = im.bg || '#2a1a2a';
+      tile.innerHTML = '<div class="t-text" style="color:' + (im.textColor || '#fff') + '">' + escHtml(im.text) + '</div>' +
+        '<button class="del" data-i="' + i + '">✕</button>';
+    } else {
+      tile.className = 'tile';
+      if (im.ts && (now - im.ts) > 7 * 86400000) tile.classList.add('manifested');
+      tile.innerHTML = '<img src="' + im.url + '">' +
+        '<button class="del" data-i="' + i + '">✕</button>';
+    }
+
+    tile.querySelector('.del').addEventListener('click', ev => {
       ev.stopPropagation();
-      if (confirm('确定要移除这块拼图吗？ 🧩')) { imgs.splice(i, 1); saveImgs(); renderBoard(); toast('🗑️ 已移除'); }
+      if (confirm('确定移除？')) { imgs.splice(i, 1); saveImgs(); renderBoard(); toast('🗑️ 已移除'); }
     });
-    card.appendChild(img); card.appendChild(del);
-    wireCardDrag(card); g.appendChild(card);
+    wireTileDrag(tile, i);
+    g.appendChild(tile);
+  });
+
+  // 添加卡
+  const addTile = document.createElement('div');
+  addTile.className = 'tile add-tile';
+  addTile.innerHTML = '<div class="plus">+</div><div class="hint">上传照片</div>';
+  addTile.addEventListener('click', () => document.getElementById('fileIn').click());
+  g.appendChild(addTile);
+  // 用 JS 设置每个 tile 高度 = 宽度，彻底避免 aspect-ratio 在 Grid 里的精度问题
+  requestAnimationFrame(() => {
+    const w = g.getBoundingClientRect().width / 4;
+    g.querySelectorAll('.tile').forEach(t => { t.style.height = w + 'px'; });
   });
 }
 
-function wireCardDrag(card) {
-  card.addEventListener('dragstart', e => {
-    dragIdx = +card.dataset.idx; card.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', card.dataset.idx);
+function wireTileDrag(tile, idx) {
+  tile.draggable = true;
+  tile.addEventListener('dragstart', e => {
+    dragIdx = idx; tile.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
   });
-  card.addEventListener('dragend', () => {
-    card.classList.remove('dragging');
-    document.querySelectorAll('.img-card').forEach(c => c.classList.remove('over'));
+  tile.addEventListener('dragend', () => {
+    tile.classList.remove('dragging');
+    document.querySelectorAll('.tile').forEach(c => c.classList.remove('over'));
   });
-  card.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
-  card.addEventListener('dragenter', e => { e.preventDefault(); card.classList.add('over'); });
-  card.addEventListener('dragleave', () => card.classList.remove('over'));
-  card.addEventListener('drop', e => {
-    e.preventDefault(); card.classList.remove('over');
-    const ti = +card.dataset.idx;
-    if (dragIdx !== null && dragIdx !== ti) {
-      const [m] = imgs.splice(dragIdx, 1); imgs.splice(ti, 0, m);
+  tile.addEventListener('dragover', e => { e.preventDefault(); });
+  tile.addEventListener('dragenter', e => { e.preventDefault(); tile.classList.add('over'); });
+  tile.addEventListener('dragleave', () => tile.classList.remove('over'));
+  tile.addEventListener('drop', e => {
+    e.preventDefault(); tile.classList.remove('over');
+    if (dragIdx !== null && dragIdx !== idx) {
+      const [m] = imgs.splice(dragIdx, 1); imgs.splice(idx, 0, m);
       saveImgs(); renderBoard();
     }
     dragIdx = null;
@@ -1144,25 +1212,68 @@ async function addFiles(files) {
   if (!list.length) return;
   let ok = 0;
   for (const f of list) {
-    try { const url = await compress(f); imgs.push({ url, ts: Date.now() }); ok++; } catch {}
+    try { const url = await compress(f); imgs.push({ type: 'photo', url, ts: Date.now() }); ok++; } catch {}
   }
-  if (ok) { saveImgs(); renderBoard(); toast('🏆 已解锁 ' + ok + ' 个成就'); }
+  if (ok) { saveImgs(); renderBoard(); toast(' 已添加 ' + ok + ' 张照片'); }
+}
+
+// ===== 文字卡 =====
+let _tcBg = '#c8a8d8';
+function openTextCardModal() {
+  document.getElementById('tcText').value = '';
+  document.getElementById('textCardModal').classList.add('show');
+  setTimeout(() => document.getElementById('tcText').focus(), 100);
+}
+function closeTextCardModal() { document.getElementById('textCardModal').classList.remove('show'); }
+
+function initTextCardUI() {
+  document.getElementById('tcColors').addEventListener('click', e => {
+    const el = e.target.closest('.tc-color'); if (!el) return;
+    document.querySelectorAll('.tc-color').forEach(c => { c.classList.remove('selected'); c.style.borderColor = 'transparent'; });
+    el.classList.add('selected'); el.style.borderColor = '#fff';
+    _tcBg = el.dataset.bg;
+  });
+  document.getElementById('tcConfirm').addEventListener('click', () => {
+    const text = document.getElementById('tcText').value.trim();
+    if (!text) return;
+    imgs.push({ type: 'text', text, bg: _tcBg, ts: Date.now() });
+    saveImgs(); renderBoard(); closeTextCardModal();
+    toast('✨ 文字卡已添加');
+  });
+  document.getElementById('tcCancel').addEventListener('click', closeTextCardModal);
+  document.getElementById('textCardModal').addEventListener('click', e => { if (e.target.id === 'textCardModal') closeTextCardModal(); });
+  document.getElementById('tcText').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) document.getElementById('tcConfirm').click();
+  });
 }
 
 function initBoard() {
   const saved = load('imgs');
   imgs = Array.isArray(saved) && saved.length ? saved : JSON.parse(JSON.stringify(DEFAULTS));
+  // 兼容旧数据
+  imgs.forEach(im => { if (!im.type) im.type = 'photo'; });
   renderBoard();
   const g = document.getElementById('vGrid');
   const fi = document.getElementById('fileIn');
   document.getElementById('btnUpload').addEventListener('click', () => fi.click());
+  document.getElementById('btnTextCard').addEventListener('click', openTextCardModal);
   fi.addEventListener('change', e => { addFiles(e.target.files); fi.value = ''; });
-  g.addEventListener('dragover', e => { if (dragIdx === null) { e.preventDefault(); g.classList.add('drop-over'); } });
-  g.addEventListener('dragleave', e => { if (!g.contains(e.relatedTarget)) g.classList.remove('drop-over'); });
+  g.addEventListener('dragover', e => {
+    if (dragIdx === null) { e.preventDefault(); }
+  });
   g.addEventListener('drop', e => {
-    g.classList.remove('drop-over');
     if (dragIdx !== null) return;
     if (e.dataTransfer.files.length) { e.preventDefault(); addFiles(e.dataTransfer.files); }
+  });
+  initTextCardUI();
+  // 窗口 resize 时重新计算 tile 高度
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const w = g.getBoundingClientRect().width / 4;
+      g.querySelectorAll('.tile').forEach(t => { t.style.height = w + 'px'; });
+    }, 100);
   });
 }
 
@@ -1329,11 +1440,7 @@ function t3Render() {
   const list = document.createElement('div');
   list.className = 't3-task-list';
   list.dataset.list = 'main';
-  // 重要任务排前面，非重要任务按原始位置排序
-  const important = t3Data.items.filter(i => i.type === 'task' && i.important);
-  const rest = t3Data.items.filter(i => !(i.type === 'task' && i.important));
-  rest.sort((a, b) => (a._origIdx || 0) - (b._origIdx || 0));
-  t3Data.items = [...important, ...rest];
+  // 不再每次渲染重排序 —— 保持数组顺序（即用户拖拽 / 新增后的顺序）
   t3Data.items.forEach((item, idx) => {
     if (item.type === 'divider') list.appendChild(t3CreateDividerEl(item, idx));
     else list.appendChild(t3CreateTaskEl(item, idx));
@@ -1365,7 +1472,13 @@ function t3CreateTaskEl(item, idx) {
   starBtn.textContent = item.important ? '★' : '☆'; starBtn.className = 't3-star' + (item.important ? ' active' : '');
   starBtn.title = item.important ? '取消重要' : '标记重要';
   starBtn.addEventListener('click', () => {
-    t3Data.items[idx].important = !t3Data.items[idx].important;
+    const item = t3Data.items[idx];
+    item.important = !item.important;
+    if (item.important) {
+      // 标记重要：移到数组首位
+      t3Data.items.splice(idx, 1);
+      t3Data.items.unshift(item);
+    }
     t3Save(); t3Render();
   });
   const txt = document.createElement('span');
@@ -1445,11 +1558,20 @@ function t3SyncFromMindmap() {
       changed = true;
     }
   });
-  // 导图里已删除的叶子 → 从 Tab3 移除（只移除标记为 fromMM 的）
+  // 导图里已删除的叶子 → 从 Tab3 移除
+  // 匹配条件：fromMM 标记的条目，或文字曾存在于导图中的条目（兼容旧数据没有 fromMM 字段的情况）
   t3Data.items = t3Data.items.filter(i => {
     if (i.type !== 'task') return true;
-    if (i.fromMM && !mmTexts.has(stripHtml(i.text))) { changed = true; return false; }
+    const t = stripHtml(i.text);
+    if (mmTexts.has(t)) return true;
+    if (i.fromMM || i._wasInMM) { changed = true; return false; }
     return true;
+  });
+  // 标记当前存在于导图中的条目，供下次同步判断是否曾属于导图
+  t3Data.items.forEach(i => {
+    if (i.type === 'task' && mmTexts.has(stripHtml(i.text)) && !i._wasInMM) {
+      i._wasInMM = true; changed = true;
+    }
   });
   if (changed) t3Save();
 }
