@@ -1,4 +1,4 @@
-const CACHE = 'mme-universe-v9';
+const CACHE = 'mme-universe-v10';
 const ASSETS = [
   './',
   './index.html',

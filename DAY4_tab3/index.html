@@ -290,6 +290,27 @@ body{
 .t3-focus-btn:hover{background:linear-gradient(135deg,rgba(123,140,200,0.22),rgba(168,140,200,0.22));transform:translateY(-1px);}
 .t3-del{background:none;border:none;color:#ccc;font-size:0.8rem;cursor:pointer;padding:2px 6px;border-radius:4px;transition:all 0.2s;font-family:inherit;}
 .t3-del:hover{color:#e74c3c;background:rgba(239,68,68,0.08);}
+/* 显化文本框 */
+.t3-note{
+  width:120px;padding:4px 10px;
+  background:rgba(123,140,200,0.04);
+  border:1px solid rgba(123,140,200,0.12);
+  border-radius:8px;
+  font-size:0.78rem;color:#6a7a9a;font-family:inherit;
+  outline:none;resize:none;
+  transition:all 0.3s;
+  flex-shrink:0;
+}
+.t3-note::placeholder{color:#b8c0d0;font-style:italic;}
+.t3-note:focus{
+  border-color:rgba(168,140,220,0.4);
+  background:rgba(168,140,220,0.06);
+  box-shadow:0 0 12px rgba(168,140,220,0.15),0 0 24px rgba(123,140,200,0.08);
+}
+.t3-note.has-note{
+  border-color:rgba(168,140,220,0.25);
+  background:rgba(168,140,220,0.04);
+}
 .t3-divider{display:flex;align-items:center;gap:8px;padding:6px 0;margin:4px 0;}
 .t3-divider-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(123,140,200,0.2),transparent);}
 .t3-divider-text{font-size:0.78rem;color:#9098b8;font-weight:700;padding:2px 8px;cursor:default;white-space:nowrap;}
@@ -351,6 +372,7 @@ body{
   .t3-ring-wrap{width:120px;height:120px;}
   .t3-time{font-size:1.5rem;}
   .t3-durations{flex-wrap:wrap;}
+  .t3-note{width:80px;font-size:0.72rem;}
 }
 
 /* ===== 新增：宇宙系列视觉增补 ===== */
@@ -1314,7 +1336,9 @@ async function init() {
   initTab4();
   document.getElementById('t3ResetBtn').addEventListener('click', () => {
     if (!confirm('确定要重置所有拼图块吗？ 🌙')) return;
-    t3Data.items.forEach(it => { if (it.type === 'task' && it.taskType === 'daily') it.done = false; });
+    t3Data.items.forEach(it => {
+      if (it.type === 'task' && it.taskType === 'daily') { it.done = false; it.note = ''; }
+    });
     t3Data.lastResetDate = '';
     t3Save(); t3Render();
     toast('🌙 新的一天，新的拼图已送达');
@@ -1429,7 +1453,9 @@ function t3DailyReset() {
   let done = 0;
   t3Data.items.forEach(it => { if (it.type === 'task' && it.done) done++; });
   t3Data.yesterdayDone = done;
-  t3Data.items.forEach(it => { if (it.type === 'task' && it.taskType === 'daily') it.done = false; });
+  t3Data.items.forEach(it => {
+    if (it.type === 'task' && it.taskType === 'daily') { it.done = false; it.note = ''; }
+  });
   t3Data.lastResetDate = today;
   t3Save();
 }
@@ -1484,6 +1510,18 @@ function t3CreateTaskEl(item, idx) {
   const txt = document.createElement('span');
   txt.className = 't3-task-text' + (item.done ? ' done' : '');
   txt.textContent = item.text;
+  // 显化文本框
+  const note = document.createElement('textarea');
+  note.className = 't3-note' + (item.note ? ' has-note' : '');
+  note.placeholder = '';
+  note.value = item.note || '';
+  note.rows = 1;
+  note.addEventListener('input', () => {
+    t3Data.items[idx].note = note.value;
+    note.classList.toggle('has-note', !!note.value.trim());
+    t3Save();
+  });
+  note.addEventListener('focus', () => { note.select(); });
   const typeBtn = document.createElement('span');
   typeBtn.className = 't3-task-type';
   typeBtn.textContent = item.taskType === 'daily' ? '🔄' : '📌';
@@ -1500,6 +1538,7 @@ function t3CreateTaskEl(item, idx) {
   delBtn.className = 't3-del'; delBtn.textContent = '✕';
   delBtn.addEventListener('click', () => { t3Data.items.splice(idx, 1); t3Save(); t3Render(); });
   el.appendChild(grip); el.appendChild(cb); el.appendChild(starBtn); el.appendChild(txt);
+  el.appendChild(note);
   el.appendChild(typeBtn); el.appendChild(focusBtn); el.appendChild(delBtn);
   return el;
 }
